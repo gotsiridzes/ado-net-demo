@@ -14,6 +14,9 @@ namespace demo.ConsoleTest
 				{
 					connection.Open();
 					connectionInformation = GetConnectionInformation(connection);
+					int rowCount = Select(connection);
+
+					Console.WriteLine($"Rows Affected: {rowCount}");
 				}
 			}
 			catch (Exception ex)
@@ -24,6 +27,19 @@ namespace demo.ConsoleTest
 			Console.WriteLine(connectionInformation);
 
 			Console.ReadKey();
+		}
+
+		private static int Select(SqlConnection connection)
+		{
+			int rowCount = 0;
+			var sql = "SELECT COUNT(*) from consumerloans.Loans";
+			using (var command = connection.CreateCommand())
+			{
+				command.CommandText = sql;
+				rowCount = (int)command.ExecuteScalar();
+			}
+
+			return rowCount;
 		}
 
 		private static string GetConnectionInformation(SqlConnection connection)
