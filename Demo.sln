@@ -8,14 +8,28 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{26792AC1-ACD1-4A63-9B80-1A4CD4BE83F2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8501B99C-3698-4CE5-A448-B056C5A79B6D}"
+	ProjectSection(SolutionItems) = preProject
+		nuget.config = nuget.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.ConsoleTest", "Demo.ConsoleTest\Demo.ConsoleTest.csproj", "{103DD52F-16F3-466F-BDC0-EF1D676F31EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{103DD52F-16F3-466F-BDC0-EF1D676F31EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{103DD52F-16F3-466F-BDC0-EF1D676F31EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{103DD52F-16F3-466F-BDC0-EF1D676F31EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{103DD52F-16F3-466F-BDC0-EF1D676F31EA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{103DD52F-16F3-466F-BDC0-EF1D676F31EA} = {26792AC1-ACD1-4A63-9B80-1A4CD4BE83F2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F4EB5884-2129-49D5-A72A-2B5D00188DC9}
