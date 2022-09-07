@@ -14,9 +14,9 @@ namespace demo.ConsoleTest
 				{
 					connection.Open();
 					connectionInformation = GetConnectionInformation(connection);
-					int rowCount = Select(connection);
+					decimal amount = Select(connection, 1);
 
-					Console.WriteLine($"Rows Affected: {rowCount}");
+					Console.WriteLine($"loan amount: {amount}");
 				}
 			}
 			catch (Exception ex)
@@ -29,17 +29,18 @@ namespace demo.ConsoleTest
 			Console.ReadKey();
 		}
 
-		private static int Select(SqlConnection connection)
+		private static decimal Select(SqlConnection connection, int id)
 		{
-			int rowCount = 0;
-			var sql = "SELECT COUNT(*) from consumerloans.Loans";
+			decimal amount = 0m;
+			var sql = "SELECT Amount from consumerloans.Loans WHERE Id = @Id";
 			using (var command = connection.CreateCommand())
 			{
 				command.CommandText = sql;
-				rowCount = (int)command.ExecuteScalar();
+				command.Parameters.Add(new SqlParameter("@Id", id));
+				amount = (decimal)command.ExecuteScalar();
 			}
 
-			return rowCount;
+			return amount;
 		}
 
 		private static string GetConnectionInformation(SqlConnection connection)
