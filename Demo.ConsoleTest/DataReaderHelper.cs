@@ -13,9 +13,7 @@ namespace Demo.ConsoleTest
 		{
 			T? ret = default;
 			if (!reader[name].Equals(DBNull.Value))
-			{
 				ret = (T)reader[name];
-			}
 
 			return ret;
 		}

@@ -9,14 +9,16 @@ namespace demo.ConsoleTest
 	{
 		public static void Main(string[] args)
 		{
+			SqlConnection connection = null;
+			SqlCommand command = null;
 			string connectionInformation = string.Empty;
 			try
 			{
-				using (var connection = new SqlConnection("server=localhost;database=B7ConsumerLoans;trusted_connection=true;"))
+				using (connection = new SqlConnection("server=localhost;database=B7ConsumerLoans;trusted_connection=true;"))
 				{
 					connection.Open();
 					connectionInformation = GetConnectionInformation(connection);
-					decimal amount = Select(connection, 1);
+					decimal amount = Select(connection, command  ,1);
 
 					Console.WriteLine($"loan amount: {amount}");
 				}
@@ -26,18 +28,18 @@ namespace demo.ConsoleTest
 				connectionInformation = ex.ToString();
 			}
 
-			GetLoanData(1);
+			GetLoanData(connection, command, 1);
 
 			Console.WriteLine(connectionInformation);
 
 			Console.ReadKey();
 		}
 
-		private static decimal Select(SqlConnection connection, int id)
+		private static decimal Select(SqlConnection connection, SqlCommand command, int id)
 		{
 			decimal amount = 0m;
 			var sql = "SELECT Amount from consumerloans.Loans WHERE Id = @Id";
-			using (var command = connection.CreateCommand())
+			using (command = connection.CreateCommand())
 			{
 				command.CommandText = sql;
 				command.Parameters.Add(new SqlParameter("@Id", id));
@@ -47,35 +49,75 @@ namespace demo.ConsoleTest
 			return amount;
 		}
 
-		private static void GetLoanData(int id)
+		private static void GetLoanData(SqlConnection connection, SqlCommand command, int id)
 		{
-			using (var connection = new SqlConnection("server=localhost;database=LMS_Trunk;trusted_connection=true;"))
+			try
 			{
-				using (var command = connection.CreateCommand())
+				using (connection = new SqlConnection("server=locaslhost;database=LMS_Trunk;trusted_connection=true;"))
 				{
-					command.CommandText = "select * from loan.LOANS where LOAN_ID = @id; select * from loan.LOANS where LOAN_ID = @id + 1";
-					command.Parameters.Add(new SqlParameter("@id", id));
-
-					connection.Open();
-					using (var reader = command.ExecuteReader(CommandBehavior.CloseConnection))
+					using (command = connection.CreateCommand())
 					{
-						while (reader.Read())
-						{
-							Console.WriteLine(reader["LOAN_ID"]);
-							Console.WriteLine(reader.GetDecimal(reader.GetOrdinal("AMOUNT")));
-							Console.WriteLine(reader.GetFieldValue<decimal>(reader.GetOrdinal("USED_AMOUNT")));
-							Console.WriteLine(reader.GetFieldValue<decimal?>("FEE1"));
-						}
+						command.CommandTimeout = 0;
+						// handling tow result sets are more effective than asking db for data two times.
+						command.CommandText =
+							"select * from loan.LOANS where LOAN_ID = @idd; select * from loan.LOANS where LOAN_ID = @id + 1";
+						command.Parameters.Add(new SqlParameter("@id", id));
 
-						reader.NextResult();
-						// next result set; i.e. multiple select statements;
-						while (reader.Read())
+						connection.Open();
+						using (var reader = command.ExecuteReader(CommandBehavior.CloseConnection))
 						{
-							Console.WriteLine(reader.GetFieldValue<int>(reader.GetOrdinal("LOAN_ID")));
-							Console.WriteLine(reader.GetDecimal(reader.GetOrdinal("AMOUNT")));
-							Console.WriteLine(reader.GetFieldValue<decimal?>("USED_AMOUNT"));
+							while (reader.Read())
+							{
+								Console.WriteLine(reader["LOAN_ID"]);
+								Console.WriteLine(reader.GetDecimal(reader.GetOrdinal("AMOUNT")));
+								Console.WriteLine(reader.GetFieldValue<decimal>(reader.GetOrdinal("USED_AMOUNT")));
+								Console.WriteLine(reader.GetFieldValue<decimal?>("FEE1"));
+							}
+
+							reader.NextResult();
+							// next result set; i.e. multiple select statements;
+							while (reader.Read())
+							{
+								Console.WriteLine(reader.GetFieldValue<int>(reader.GetOrdinal("LOAN_ID")));
+								Console.WriteLine(reader.GetDecimal(reader.GetOrdinal("AMOUNT")));
+								Console.WriteLine(reader.GetFieldValue<decimal?>("USED_AMOUNT"));
+							}
 						}
 					}
+				}
+			}
+			catch (SqlException ex)
+			{
+				SqlExceptionManager.Instance.Publish(ex, command, "hello world");
+				Console.WriteLine(SqlExceptionManager.Instance.LastException.ToString());
+				//StringBuilder sb = new StringBuilder();
+				//for (int i = 0; i < ex.Errors.Count; i++)
+				//{
+				//	sb.AppendLine($"Index: {i.ToString()}");
+				//	sb.AppendLine($"Type: {ex.Errors[i].GetType().FullName}");
+				//	sb.AppendLine($"Message: {ex.Errors[i].Message}");
+				//	sb.AppendLine($"Source: {ex.Errors[i].Source}");
+				//	sb.AppendLine($"Number: {ex.Errors[i].Number}");
+				//	sb.AppendLine($"State: {ex.Errors[i].State}");
+				//	sb.AppendLine($"Class: {ex.Errors[i].Class}");
+				//	sb.AppendLine($"Server: {ex.Errors[i].Server}");
+				//	sb.AppendLine($"Procedure: {ex.Errors[i].Procedure}");
+				//	sb.AppendLine($"Line Number: {ex.Errors[i].LineNumber}");
+				//}
+
+				//Console.WriteLine(sb.ToString()+ Environment.NewLine + ex);
+			}
+			finally
+			{
+				if (connection != null)
+				{
+					connection.Close();
+					connection.Dispose();
+				}
+
+				if (command != null)
+				{
+					command.Dispose();
 				}
 			}
 		}
