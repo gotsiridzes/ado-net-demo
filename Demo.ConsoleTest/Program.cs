@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Text;
 using Demo.ConsoleTest;
+using Demo.ConsoleTest.Models;
 
 namespace demo.ConsoleTest
 {
@@ -10,9 +11,58 @@ namespace demo.ConsoleTest
 	{
 		public static void Main(string[] args)
 		{
-
-			UseDataAdapter();
+			var products = GetProductsFromAdventureWorks();
 			Console.ReadKey();
+		}
+
+		private static List<Product> GetProductsFromAdventureWorks()
+		{
+			var products = new List<Product>();
+			int rowsAffected = 0;
+			DataTable dt = null;
+
+			var sql = "SELECT * from Production.Product";
+			using (var connection = new SqlConnection("server=localhost;database=AdventureWorks2017;trusted_connection=true"))
+			{
+				using (var command = connection.CreateCommand())
+				{
+					command.CommandText = sql;
+					using (var adapter = new SqlDataAdapter(command))
+					{
+						try
+						{
+							dt = new DataTable();
+							adapter.Fill(dt);
+
+							if (dt != null && dt.Rows.Count > 0)
+							{
+								//products = (from row in dt.AsEnumerable()
+								//	select new Product
+								//	{
+								//		Id = row.Field<int>("ProductId"),
+								//		Name = row.Field<string>("Name"),
+								//		ProductNumber = row.Field<string>("ProductNumber")
+								//	}).ToList();
+
+								products = (dt.AsEnumerable()
+									.Select(row => new Product
+									{
+										Id = row.Field<int>("ProductId"),
+										Name = row.Field<string>("Name"),
+										ProductNumber = row.Field<string>("ProductNumber")
+									})).ToList();
+							}
+						}
+						catch (Exception e)
+						{
+							SqlExceptionManager.Instance.Publish(e, command, "test");
+							Console.WriteLine(SqlExceptionManager.Instance.LastException);
+						}
+					}
+				}
+			}
+
+			return products;
 		}
 
 		private static void UseDataAdapter()
