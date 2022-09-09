@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Text;
 using Demo.ConsoleTest;
@@ -9,16 +10,72 @@ namespace demo.ConsoleTest
 	{
 		public static void Main(string[] args)
 		{
+
+			UseDataAdapter();
+			Console.ReadKey();
+		}
+
+		private static void UseDataAdapter()
+		{
+			DataTable dataTable = null;
+			using (var connection =new SqlConnection("server=localhost;database=AdventureWorksLT2017;trusted_connection=true"))
+			{
+				using (var command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT * FROM SalesLT.Customer";
+					using (var adapter = new SqlDataAdapter(command))
+					{
+						try
+						{
+							dataTable = new DataTable();
+							adapter.Fill(dataTable);
+
+							ProcessRowsAndColumns(dataTable);
+						}
+						catch (Exception e)
+						{
+							SqlExceptionManager.Instance.Publish(e, command, "test");
+							Console.WriteLine(SqlExceptionManager.Instance.LastException);
+							
+							throw;
+						}
+					}
+				}
+			}
+		}
+
+		private static void ProcessRowsAndColumns(DataTable dataTable)
+		{
+			int index = 1;
+			StringBuilder sb = new StringBuilder();
+
+			// reading each row
+			foreach (DataRow row in dataTable.Rows)
+			{
+				sb.AppendLine($"** Row: {index} **");
+				//reading each column
+				foreach (DataColumn column in dataTable.Columns)
+					sb.AppendLine($"{column.ColumnName}: {row[column.ColumnName]}");
+
+				sb.AppendLine();
+				index++;
+			}
+
+			Console.WriteLine(sb);
+		}
+
+		private static void Test()
+		{
 			SqlConnection connection = null;
 			SqlCommand command = null;
 			string connectionInformation = string.Empty;
 			try
 			{
-				using (connection = new SqlConnection("server=localhost;database=B7ConsumerLoans;trusted_connection=true;"))
+				using (connection = new SqlConnection("server=localhost;database=AdventureWorksLT2017;trusted_connection=true;"))
 				{
 					connection.Open();
 					connectionInformation = GetConnectionInformation(connection);
-					decimal amount = Select(connection, command  ,1);
+					decimal amount = Select(connection, command, 1);
 
 					Console.WriteLine($"loan amount: {amount}");
 				}
@@ -31,8 +88,6 @@ namespace demo.ConsoleTest
 			GetLoanData(connection, command, 1);
 
 			Console.WriteLine(connectionInformation);
-
-			Console.ReadKey();
 		}
 
 		private static decimal Select(SqlConnection connection, SqlCommand command, int id)
@@ -53,7 +108,7 @@ namespace demo.ConsoleTest
 		{
 			try
 			{
-				using (connection = new SqlConnection("server=locaslhost;database=LMS_Trunk;trusted_connection=true;"))
+				using (connection = new SqlConnection("server=locaslhost;database=AdventureWorksLT2017;trusted_connection=true;"))
 				{
 					using (command = connection.CreateCommand())
 					{
