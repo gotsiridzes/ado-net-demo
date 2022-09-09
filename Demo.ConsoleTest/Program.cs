@@ -11,8 +11,42 @@ namespace demo.ConsoleTest
 	{
 		public static void Main(string[] args)
 		{
-			var products = GetProductsFromAdventureWorks();
+			HandleMultipleResultSetsFromAdventureWorks();
 			Console.ReadKey();
+		}
+
+		private static void HandleMultipleResultSetsFromAdventureWorks()
+		{
+			var ds = new DataSet();
+			var sql = "SELECT TOP 1000 * FROM Sales.Customer c;\r\nSELECT  * FROM Sales.Store s";
+			DataTable customersDt = null;
+			DataTable storesDt = null;
+
+			using (var connection =
+			       new SqlConnection("server=localhost;database=AdventureWorks2017;trusted_connection=true"))
+			{
+				using (var command = connection.CreateCommand())
+				{
+					command.CommandText = sql;
+					using (var adapter = new SqlDataAdapter(command))
+					{
+						try
+						{
+							adapter.Fill(ds);
+							if (ds.Tables.Count > 0)
+							{
+								customersDt = ds.Tables[0]; // result of first select;
+								storesDt = ds.Tables[1]; // result of sales.store
+							}
+						}
+						catch (Exception e)
+						{
+							SqlExceptionManager.Instance.Publish(e, command, "test");
+							Console.WriteLine(SqlExceptionManager.Instance.LastException);
+						}
+					}
+				}
+			}
 		}
 
 		private static List<Product> GetProductsFromAdventureWorks()
