@@ -68,25 +68,7 @@ namespace demo.ConsoleTest
 							dt = new DataTable();
 							adapter.Fill(dt);
 
-							if (dt != null && dt.Rows.Count > 0)
-							{
-								//products = (from row in dt.AsEnumerable()
-								//	select new Product
-								//	{
-								//		Id = row.Field<int>("ProductId"),
-								//		Name = row.Field<string>("Name"),
-								//		ProductNumber = row.Field<string>("ProductNumber")
-								//	}).ToList();
-
-								products = (dt.AsEnumerable()
-									.Select(row => new Product
-									{
-										Id = row.Field<int>("ProductId"),
-										Name = row.Field<string>("Name")!,
-										ProductNumber = row.Field<string>("ProductNumber")!,
-										Color = row.Field<string?>("Color")
-									})).ToList();
-							}
+							products = ProductsAsList(dt, products);
 						}
 						catch (Exception e)
 						{
@@ -95,6 +77,31 @@ namespace demo.ConsoleTest
 						}
 					}
 				}
+			}
+
+			return products;
+		}
+
+		private static List<Product> ProductsAsList(DataTable dt, List<Product> products)
+		{
+			if (dt != null && dt.Rows.Count > 0)
+			{
+				//products = (from row in dt.AsEnumerable()
+				//	select new Product
+				//	{
+				//		Id = row.Field<int>("ProductId"),
+				//		Name = row.Field<string>("Name"),
+				//		ProductNumber = row.Field<string>("ProductNumber")
+				//	}).ToList();
+
+				products = (dt.AsEnumerable()
+					.Select(row => new Product
+					{
+						Id = row.Field<int>("ProductId"),
+						Name = row.Field<string>("Name")!,
+						ProductNumber = row.Field<string>("ProductNumber")!,
+						Color = row.Field<string?>("Color")
+					})).ToList();
 			}
 
 			return products;
