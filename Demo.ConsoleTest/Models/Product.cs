@@ -11,5 +11,6 @@ namespace Demo.ConsoleTest.Models
 		public int Id { get; set; }
 		public string Name { get; set; }
 		public string ProductNumber { get; set; }
+		public string? Color { get; set; }
 	}
 }

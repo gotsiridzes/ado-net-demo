@@ -48,8 +48,9 @@ namespace demo.ConsoleTest
 									.Select(row => new Product
 									{
 										Id = row.Field<int>("ProductId"),
-										Name = row.Field<string>("Name"),
-										ProductNumber = row.Field<string>("ProductNumber")
+										Name = row.Field<string>("Name")!,
+										ProductNumber = row.Field<string>("ProductNumber")!,
+										Color = row.Field<string?>("Color")
 									})).ToList();
 							}
 						}
