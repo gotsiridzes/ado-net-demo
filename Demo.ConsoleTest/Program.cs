@@ -11,7 +11,6 @@ namespace demo.ConsoleTest
 	{
 		public static void Main(string[] args)
 		{
-			HandleMultipleResultSetsFromAdventureWorks();
 			Console.ReadKey();
 		}
 
@@ -22,8 +21,7 @@ namespace demo.ConsoleTest
 			DataTable customersDt = null;
 			DataTable storesDt = null;
 
-			using (var connection =
-			       new SqlConnection("server=localhost;database=AdventureWorks2017;trusted_connection=true"))
+			using (var connection = new SqlConnection("server=localhost;database=AdventureWorks2017;trusted_connection=true"))
 			{
 				using (var command = connection.CreateCommand())
 				{
@@ -94,7 +92,8 @@ namespace demo.ConsoleTest
 				//		ProductNumber = row.Field<string>("ProductNumber")
 				//	}).ToList();
 
-				products = (dt.AsEnumerable()
+				products = (dt
+					.AsEnumerable()
 					.Select(row => new Product
 					{
 						Id = row.Field<int>("ProductId"),
